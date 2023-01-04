@@ -1,0 +1,6 @@
+[submodule "vendor/catima"]
+	path = vendor/catima
+	url = https://github.com/gwm17/catima.git
+[submodule "vendor/fmt"]
+	path = vendor/fmt
+	url = https://github.com/fmtlib/fmt.git

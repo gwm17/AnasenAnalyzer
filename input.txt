@@ -1,0 +1,33 @@
+begin_target
+	Density(g/cm^3): 8.76e-5
+	begin_elements (Z, A, Stoich.)
+        element 1 2 2
+	end_elements
+end_target
+begin_flags
+	OneTrack
+	TwoTrack
+	ThreeTrack
+end_flags
+begin_cuts
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/protonEde_01042023.root protonEde
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/alphaEde_01042023.root alphaEde
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/he3Cut.root he3Ede
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/deutCut.root deutEde
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/joinedAlphaCut.root joinedAlphaEde
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/beamCut.root beamE
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/be8Cut.root be8Dalitz
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/li5Cut.root li5Dalitz
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/nabin_bpzCut.root beamPz
+	/media/gordon/ANASENData/be7_oldAnasen/cuts/be8_ecm_nubCut.root nubCut
+end_cuts
+begin_gates
+	Be8gs -0.5 0.5
+	Be81ex 1.0 6.0
+end_gates
+begin_data
+	/media/gordon/ANASENData/be7_oldAnasen/data/MainC.root
+	/media/gordon/ANASENData/be7_oldAnasen/data/MainB.root
+	/media/gordon/ANASENData/be7_oldAnasen/data/MainC_2.root
+end_data
+Output: /media/gordon/ANASENData/be7_oldAnasen/analyzed/temp_redux.root

@@ -93,7 +93,6 @@ namespace AnasenAnalyzer {
             flags |= ConvertStringToFlag(junk);
         }
         config >> junk;
-        fmt::print("Value {0}", junk);
         if (junk != "begin_cuts")
         {
             fmt::print("Configuration file not formated correctly! Must have list of cut files!\n");
@@ -142,6 +141,7 @@ namespace AnasenAnalyzer {
         m_analyzerHandle->SetFlags(flags);
 
         m_isValid = true;
+        fmt::print("Output path: {0}\n", m_outputPath);
         fmt::print("Parsed config in {0} successfully...\n", path);
     }
 

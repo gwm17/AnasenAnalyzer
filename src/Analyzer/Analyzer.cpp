@@ -185,7 +185,7 @@ namespace AnasenAnalyzer {
             if (track.theta < 0.0)
                 track.theta += M_PI;
             track.phi = track.siHit.phi;
-            track.pathLength = track.siHit.r / std::sin(track.theta);
+            track.pathLength = std::hypot(track.siHit.r, track.interactionPointZ - track.siHit.z); //dont use theta here. Bad co-dependence
             if (track.interactionPointZ > 0.0 && track.interactionPointZ < s_anasenLength)
             {
                 track.beamEnergyLoss = m_target.GetEnergyLoss(s_beamZ, s_beamA, s_initialBeamEnergy, (s_anasenLength - track.interactionPointZ) / 100.0);

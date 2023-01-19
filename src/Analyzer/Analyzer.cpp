@@ -104,7 +104,7 @@ namespace AnasenAnalyzer {
         Currently this is approximated by assuming that the interaction point is on axis (along z), but we know that this is not true. RESOLUT ribs typically have
         a ~2cm diameter beam spot, and straggling through the active target will only worsen this. This impacts EVERYTHING; beam energy, energy conservation, event construction, etc.
         This can only be fixed with better detector engineering. This is related to the misconception that z-position determines beam energy; the beam energy is determined by the path-length
-        through the gas volume. See diagram below. (The more "on axis" the ejecta are, the more severe the difference is, which is not great)
+        through the gas volume. See cartoon below. (The more "on axis" the ejecta are, the more severe the difference is, which is not great)
                                                 _______Si
                                                    /
                                                   /
@@ -356,7 +356,7 @@ namespace AnasenAnalyzer {
         std::vector<Track> protons;
         for(auto& track : event.complete)
         {
-            if(track.IsValid() /*&& track.IsBeamValid(s_initialBeamEnergy)*/)
+            if(track.IsValid() && track.IsBeamValid(s_initialBeamEnergy))
             {
                 if(m_cutHandler->IsInside("alphaEde", track.siHit.energy, track.pcHit.energy * std::sin(track.theta)))
                 {
@@ -419,6 +419,9 @@ namespace AnasenAnalyzer {
             FillHistogram2D({"Ex5LiTracked_vs_Ex5LiQval_3track", "Ex5LiTracked_vs_Ex5LiQval_3track; ExTrack(MeV);ExQ(MeV)", 600, -20.0, 50.0, 600, -20.0, 50.0}, result5LiTracked.residualExcitation, result5LiQ.residualExcitation);
             FillHistogram2D({"Ex5Li_vs_BeamKE_Qval_3track", "Ex5Li_vs_BeamKE_Qval_3track;KE(MeV);Ex(MeV)", 600, -10.0, 80.0, 600, -20.0, 50.0}, result5LiQ.projectileRxnKE, result5LiQ.residualExcitation);
             
+            FillHistogram2D({"5Li_tracked_vs_Qval_beamKE","5Li_tracked_vs_Qval_beamKE;Tracked;Qval",600,-1.0, 20.0,600,-1.0,20.0}, result5LiTracked.projectileRxnKE, result5LiQ.projectileRxnKE);
+            FillHistogram2D({"5Li_Qval_beamPz_beamKE","5Li_Qval_beamPz_beamKE;Pz;KE",600,-1.0, 20.0,600,-1.0,20.0}, result5LiQ.projectileVec.Pz(), result5LiQ.projectileRxnKE);
+
             double beamKE_step = 0.2;
             int beamBin = std::ceil(result8BeQ.projectileRxnKE / beamKE_step);
             int tlbin = std::ceil(std::cos(result5LiQ.ejectileThetaCM) / 0.2) + 5;
@@ -427,14 +430,27 @@ namespace AnasenAnalyzer {
             {
                 FillHistogram2D({"Dalitz", "Dalitz;a+a (GeV^{2});p+a(GeV^{2});", 90, 55.55, 56.0, 50, 21.75, 22.0}, result8BeQ.residualMassSq, result5LiQ.residualMassSq);
                 FillHistogram2D({"Dalitz_Ex", "Dalitz_Ex;a+a(MeV);p+a(MeV)", 100, -10.0, 20.0, 100, -10.0, 20.0}, result8BeQ.residualExcitation, result5LiQ.residualExcitation);
-                if (m_cutHandler->IsInside("li5Dalitz", result8BeQ.residualMassSq, result5LiQ.residualMassSq))
+                if (m_cutHandler->IsInside("li5Dalitz", result8BeQ.residualMassSq, result5LiQ.residualMassSq) &&
+                    m_cutHandler->IsInside("beamE", result5LiTracked.projectileRxnKE, result5LiQ.projectileRxnKE) &&
+                    m_cutHandler->IsInside("beamPz", result5LiQ.projectileVec.Pz(), result5LiQ.projectileRxnKE) &&
+                    result5LiQ.projectileVec.Rho() < 100.0)
                 {
+
+                    FillHistogram2D({"Dalitz_gated", "Dalitz;a+a (GeV^{2});p+a(GeV^{2});", 90, 55.55, 56.0, 50, 21.75, 22.0}, result8BeQ.residualMassSq, result5LiQ.residualMassSq);
+                    FillHistogram1D({"Ecm_li5gs_reconThreeParticle", "Ecm_li5gs_reconThreeParticle;Ex(MeV);", 1600, -10.0, 30.0}, result5LiQ.parentECM);
+                    FillHistogram1D({"Ecm_li5gs_reconThreeParticle_goodBins", "Ecm_li5gs_reconThreeParticle;Ex(MeV);", 60, 0.0, 2.7}, result5LiQ.parentECM);
                     if (result5LiQ.parentECM > 0.267 && result5LiQ.parentECM < 0.468)
                         FillHistogram1D({"AngDist_Li5_resGated", "AngDist_Li5_resGated;cos#theta_{CM}", 10, -1.0, 1.0}, std::cos(result5LiQ.ejectileThetaCM));
                 }
 
-                if (m_cutHandler->IsInside("be8Dalitz", result8BeQ.residualMassSq, result5LiQ.residualMassSq))
+                if (m_cutHandler->IsInside("be8Dalitz", result8BeQ.residualMassSq, result5LiQ.residualMassSq) &&
+                    m_cutHandler->IsInside("beamE", result5LiTracked.projectileRxnKE, result5LiQ.projectileRxnKE) &&
+                    m_cutHandler->IsInside("beamPz", result5LiQ.projectileVec.Pz(), result5LiQ.projectileRxnKE) &&
+                    result5LiQ.projectileVec.Rho() < 100.0)
                 {
+                    FillHistogram2D({"Dalitz_gated", "Dalitz;a+a (GeV^{2});p+a(GeV^{2});", 90, 55.55, 56.0, 50, 21.75, 22.0}, result8BeQ.residualMassSq, result5LiQ.residualMassSq);
+                    FillHistogram1D({"Ecm_be81ex_reconThreeParticle", "Ecm_be81ex_reconThreeParticle;Ex(MeV);", 1600, -10.0, 30.0}, result8BeQ.parentECM);
+                    FillHistogram1D({"Ecm_be81ex_reconThreeParticle_goodBins", "Ecm_be81ex_reconThreeParticle;Ex(MeV);", 60, 0.0, 2.7}, result8BeQ.parentECM);
                     if (result8BeQ.parentECM > 0.267 && result8BeQ.parentECM < 0.468)
                         FillHistogram1D({"AngDist_Be8_resGated", "AngDist_Be8_resGated;cos#theta_{CM}", 10, -1.0, 1.0}, std::cos(result8BeQ.ejectileThetaCM));
                 }

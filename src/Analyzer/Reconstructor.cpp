@@ -4,6 +4,8 @@
 #include "fmt/core.h"
 #include "fmt/format.h"
 #include "Math/Boost.h"
+#include "TLorentzVector.h"
+#include "TVector3.h"
 
 namespace AnasenAnalyzer {
 
@@ -346,7 +348,11 @@ namespace AnasenAnalyzer {
         auto break2Vec = GetLorentzVectorFromTrack(avgIntPoint, breakup2, ReconParticle::Breakup2);
 
         ROOT::Math::PxPyPzEVector sumProductsVec = ejectVec + break1Vec + break2Vec;
-        auto projVec = sumProductsVec - targVec;
+        double beamKE = sumProductsVec.E() - m_targetData.mass - m_projectileData.mass;
+        double beamP = std::sqrt(beamKE * (beamKE + 2.0 * m_projectileData.mass));
+        auto projVec = ROOT::Math::PxPyPzEVector();
+        projVec.SetPxPyPzE(0.0, 0.0, beamP, beamKE + m_projectileData.mass);
+        auto parentVec = projVec + ROOT::Math::PxPyPzEVector(0., 0., 0., m_targetData.mass);
         auto residualVec = break1Vec + break2Vec;
 
         result.avgInteractionZ = avgIntPoint;
@@ -355,16 +361,16 @@ namespace AnasenAnalyzer {
         result.ejectileRxnKE = ejectVec.E() - ejectVec.M();
         result.projectileVec = projVec;
         result.residualVec = residualVec;
-        result.parentExcitation = sumProductsVec.M() - m_targetData.mass - m_projectileData.mass;
+        result.parentExcitation = parentVec.M() - m_targetData.mass - m_projectileData.mass;
         result.residualExcitation = residualVec.M() - m_residualData.mass;
         result.residualMassSq = residualVec.M() * residualVec.M() * s_MeV2GeV * s_MeV2GeV;
 
-        ROOT::Math::Boost boostVec(sumProductsVec.BoostToCM());
-        sumProductsVec = boostVec * sumProductsVec;
+        ROOT::Math::Boost boostVec(parentVec.BoostToCM());
+        parentVec = boostVec * parentVec;
         residualVec = boostVec * residualVec;
         ejectVec = boostVec * ejectVec;
         result.ejectileThetaCM = ejectVec.Theta();
-        result.parentECM = sumProductsVec.E() - m_projectileData.mass - m_targetData.mass;
+        result.parentECM = parentVec.E() - m_targetData.mass - m_projectileData.mass;
 
         return result;
     }
